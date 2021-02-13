@@ -4,17 +4,10 @@ import inspect
 
 
 def wrap_paragraph(text, width=70):
-    return "\n".join(
-        map(
-            lambda s: textwrap.shorten(s, width=width),
-                text.splitlines()
-            )
-    )
-
+    return "\n".join(map(lambda s: textwrap.shorten(s, width=width), text.splitlines()))
 
 
 class Context(object):
-
     def __init__(self):
         self.auto_wrap_callable = True
         self.text_prefix = "> "
@@ -23,13 +16,18 @@ class Context(object):
         self.echo_args = True
 
     def wrap(self, f):
-        
+
         header_call = f"CALL: {f.__name__}"
         header_ret = "-> out"
+
         @wraps(f)
         def wrapper(*args, **kwargs):
             caller = inspect.getframeinfo(inspect.stack()[1][0])
-            caller_info = "%s:%d in %s" % (caller.filename, caller.lineno, caller.function)
+            caller_info = "%s:%d in %s" % (
+                caller.filename,
+                caller.lineno,
+                caller.function,
+            )
 
             header = f"[{header_call}, FROM: {caller_info}]\n<- in"
             content_call = self.describe_args(*args, **kwargs)
@@ -59,7 +57,9 @@ class Context(object):
                 content += "\n"
 
         if kwargs:
-            content += "\n".join(f"{key} = {repr(value)}" for key, value in kwargs.items())
+            content += "\n".join(
+                f"{key} = {repr(value)}" for key, value in kwargs.items()
+            )
 
         if content:
             content = textwrap.indent(content, prefix=self.text_prefix)
@@ -76,7 +76,6 @@ class Context(object):
         text = textwrap.indent(text, prefix="  " * self.depth_count)
 
         print(text)
-        
 
     def __call__(self, *args, **kwargs):
         if args and inspect.isfunction(args[0]) and self.auto_wrap_callable:
