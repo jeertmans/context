@@ -1,0 +1,6 @@
+
+*.swp
+
+context/__pycache__/
+
+main.py
