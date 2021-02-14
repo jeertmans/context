@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="ctxt",
-    version="0.0.1",
+    version="0.0.2",
     author="Jérome Eertmans",
     author_email="jeertmans@icloud.com",
     description="Very simpler debugger providing context",

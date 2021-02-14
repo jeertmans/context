@@ -4,3 +4,11 @@
 context/__pycache__/
 
 main.py
+
+build/
+
+dist/
+
+ctxt.egg-info/
+
+demo/.ipynb_checkpoints/
