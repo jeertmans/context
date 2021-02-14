@@ -8,12 +8,22 @@ def wrap_paragraph(text, width=70):
 
 
 class Context(object):
-    def __init__(self):
-        self.auto_wrap_callable = True
-        self.text_prefix = "> "
+    def __init__(
+        self,
+        auto_wrap_callable=True,
+        text_prefix="> ",
+        text_width=70,
+        text_indent="  ",
+        echo_args=False,
+        echo_ret=False,
+    ):
+        self.auto_wrap_callable = auto_wrap_callable
+        self.text_prefix = text_prefix
+        self.text_indent = text_indent
         self.depth_count = 0
-        self.text_width = 70
-        self.echo_args = True
+        self.text_width = text_width
+        self.echo_args = echo_args
+        self.echo_ret = echo_ret
 
     def wrap(self, f):
 
@@ -29,9 +39,14 @@ class Context(object):
                 caller.function,
             )
 
-            header = f"[{header_call}, FROM: {caller_info}]\n<- in"
-            content_call = self.describe_args(*args, **kwargs)
-            self.echo(header, content_call)
+            header = f"[{header_call}, FROM: {caller_info}]"
+
+            if self.echo_args:
+                header = header + "\n<- in"
+                content_call = self.describe_args(*args, **kwargs)
+                self.echo(header, content_call)
+            else:
+                self.echo(header)
 
             self.depth_count += 1
 
@@ -39,9 +54,11 @@ class Context(object):
 
             self.depth_count -= 1
 
-            ret_tuple = ret if isinstance(ret, tuple) else (ret,)
-            content_ret = self.describe_args(*ret_tuple)
-            self.echo(header_ret, content_ret)
+            if self.echo_ret:
+                ret_tuple = ret if isinstance(ret, tuple) else (ret,)
+                content_ret = self.describe_args(*ret_tuple)
+                self.echo(header_ret, content_ret)
+
             return ret
 
         return wrapper
@@ -73,7 +90,7 @@ class Context(object):
             text = header
 
         text = wrap_paragraph(text, width=self.text_width)
-        text = textwrap.indent(text, prefix="  " * self.depth_count)
+        text = textwrap.indent(text, prefix=self.text_indent * self.depth_count)
 
         print(text)
 
@@ -87,5 +104,20 @@ class Context(object):
 
         self.echo(header, content)
 
+        if args and kwargs:
+            return (args, kwargs.items())
+
+        elif args:
+            if len(args) == 1:
+                return args[0]
+            else:
+                return args
+        elif kwargs:
+            if len(kwargs) == 1:
+                return kwargs.popitem()
+            else:
+                return kwargs.items()
+
 
 here = Context()
+ctxt = Context(echo_args=True, echo_ret=True)
